@@ -1,0 +1,64 @@
+# 行业差异化阈值配置
+
+industries:
+  technology:  # 科技类
+    industries: ["电子", "计算机", "通信", "传媒"]
+    thresholds:
+      min_roe: 8
+      min_research_intensity: 10
+      max_goodwill_ratio: 40
+  
+  manufacturing:  # 制造业
+    industries: ["机械设备", "电气设备", "汽车", "轻工制造", "纺织服装"]
+    thresholds:
+      min_roe: 5
+      min_research_intensity: 2
+      max_goodwill_ratio: 20
+  
+  consumer:  # 大消费
+    industries: ["食品饮料", "家用电器", "农林牧渔", "商业贸易", "休闲服务"]
+    thresholds:
+      min_roe: 10
+      min_research_intensity: 1
+      max_goodwill_ratio: 25
+  
+  finance:  # 金融
+    industries: ["银行", "非银金融"]
+    thresholds:
+      min_roe: 10
+      min_research_intensity: 0
+      max_goodwill_ratio: 5
+  
+  materials:  # 周期材料
+    industries: ["化工", "建筑材料", "有色金属", "钢铁", "采掘"]
+    thresholds:
+      min_roe: 6
+      min_research_intensity: 1
+      max_goodwill_ratio: 15
+  
+  healthcare:  # 医药
+    industries: ["医药生物"]
+    thresholds:
+      min_roe: 12
+      min_research_intensity: 8
+      max_goodwill_ratio: 35
+  
+  real_estate:  # 房地产及产业链
+    industries: ["房地产", "建筑装饰"]
+    thresholds:
+      min_roe: 8
+      min_research_intensity: 0.5
+      max_goodwill_ratio: 10
+  
+  utilities:  # 公用事业
+    industries: ["公用事业", "交通运输"]
+    thresholds:
+      min_roe: 6
+      min_research_intensity: 0.5
+      max_goodwill_ratio: 10
+
+# 默认阈值（未配置的行业）
+default_thresholds:
+  min_roe: 8
+  min_research_intensity: 2
+  max_goodwill_ratio: 20

@@ -1,0 +1,38 @@
+# 核心数据处理
+pandas>=2.0.0
+numpy>=1.24.0
+pyarrow>=12.0.0
+scipy>=1.11.0
+
+# 数据库
+sqlite-utils>=3.35
+
+# NLP
+transformers>=4.30.0
+torch>=2.0.0
+sentencepiece>=0.1.99
+
+# PDF解析
+pdfplumber>=0.9.0
+PyMuPDF>=1.22.0
+
+# 量化回测
+pyqlib>=0.9.0
+
+# 可视化
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# 工具
+pyyaml>=6.0
+tqdm>=4.65.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# 测试
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Jupyter
+jupyter>=1.0.0
+notebook>=7.0.0

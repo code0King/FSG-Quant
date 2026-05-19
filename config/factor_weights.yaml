@@ -1,0 +1,15 @@
+# 打分卡权重配置
+
+offensive:  # 进攻型策略权重
+  l2_fulfillment: 0.30      # L2战略兑现率
+  l1_revenue_growth: 0.25   # L1营收增速
+  l1_profit_quality: 0.20   # L1盈利质量
+  l3_governance: 0.15       # L3治理评分
+  l2_sentiment: 0.10        # L2情绪稳定性
+
+defensive:  # 防御型策略权重
+  l3_governance: 0.35       # L3治理评分
+  l1_cash_quality: 0.30     # L1现金流质量
+  l1_asset_health: 0.20     # L1资产健康度
+  l2_consistency: 0.10      # L2战略一致性
+  l1_stability: 0.05        # L1盈利稳定性

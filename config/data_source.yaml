@@ -1,0 +1,89 @@
+# 数据源配置
+# 
+# 支持的数据源类型：
+# - 'sqlite': SQLite数据库（默认）
+# - 'local_csv': 本地CSV/Excel文件
+# - 'local_pdf': 本地PDF年报（需要解析）
+# - 'api': 在线API（Tushare/Akshare）
+
+data_source:
+  # 当前使用的数据源类型
+  type: 'sqlite'
+  
+  # ==================== SQLite数据源配置 ====================
+  sqlite:
+    # 数据库文件路径（相对于项目根目录）
+    db_path: 'data/raw/financial_data.sqlite'
+    
+  # ==================== 本地CSV数据源配置 ====================
+  local_csv:
+    # 财务数据CSV目录
+    financial_dir: 'data/local/financial'
+    # 治理数据CSV目录
+    governance_dir: 'data/local/governance'
+    # 行情数据CSV目录
+    market_dir: 'data/local/market'
+    # 因子数据Parquet目录
+    factors_dir: 'data/factors'
+    # CSV文件编码
+    encoding: 'utf-8'
+    
+  # ==================== 本地PDF数据源配置 ====================
+  local_pdf:
+    # PDF年报存放目录
+    pdf_dir: 'data/raw/annual_reports'
+    # 解析后的数据输出目录
+    parsed_output_dir: 'data/processed/parsed_reports'
+    # 是否启用缓存（避免重复解析）
+    cache_enabled: true
+    # 缓存目录
+    cache_dir: 'data/processed/pdf_cache'
+    # PDF解析器选择：'pdfplumber' | 'pymupdf' | 'auto'
+    parser_type: 'auto'
+    
+  # ==================== API数据源配置 ====================
+  api:
+    # API提供商：'tushare' | 'akshare' | 'auto'
+    provider: 'akshare'
+    
+    # Tushare配置
+    tushare:
+      # Token（建议从环境变量读取）
+      token: '${TUSHARE_TOKEN}'
+      # API基础URL
+      base_url: 'http://api.tushare.pro'
+      # 请求间隔（秒），避免频率限制
+      request_interval: 0.5
+      
+    # Akshare配置（免费，无需Token）
+    akshare:
+      # 是否使用代理
+      use_proxy: false
+      # 请求超时时间（秒）
+      timeout: 30
+      # 请求间隔（秒）
+      request_interval: 1.0
+      
+  # ==================== 数据源优先级和回退策略 ====================
+  fallback:
+    # 当主要数据源失败时，是否尝试备用数据源
+    enabled: true
+    # 备用数据源顺序
+    order: ['sqlite', 'local_csv', 'api']
+    
+  # ==================== 通用配置 ====================
+  # 数据验证
+  validation:
+    # 是否验证数据完整性
+    check_completeness: true
+    # 必需字段列表
+    required_fields:
+      financial: ['stock_code', 'report_year', 'revenue', 'net_profit']
+      governance: ['stock_code', 'report_year']
+      
+  # 日志
+  logging:
+    # 是否记录详细的数据加载日志
+    verbose: false
+    # 记录失败的加载尝试
+    log_failures: true
