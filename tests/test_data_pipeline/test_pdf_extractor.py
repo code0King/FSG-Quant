@@ -17,7 +17,7 @@ def test_extract_text_fallback_empty(tmp_path):
 
 
 def test_extract_text_pymupdf_fallback(tmp_path):
-    """pdf_extractor 在无 PDF-Extract-Kit 时用 PyMuPDF 降级"""
+    """pdf_extractor 使用 PyMuPDF 提取文本"""
     from data_pipeline.pdf_extractor import extract_text, FITZ_AVAILABLE
     if not FITZ_AVAILABLE:
         return

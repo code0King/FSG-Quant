@@ -6,7 +6,7 @@ PDF年报解析器
 2. 审计意见类型
 3. 股权质押比例
 
-使用 pdf_extractor 模块（PDF-Extract-Kit → PyMuPDF 降级）替代直接 PyMuPDF 调用。
+使用 pdf_extractor 模块（PyMuPDF 提取文本 + pdfplumber 提取表格）。
 
 用法:
     from data_pipeline.pdf_parser import AnnualReportParser
@@ -78,6 +78,14 @@ class AnnualReportParser:
 
     def __init__(self, use_pdfplumber: bool = True):
         self.use_pdfplumber = use_pdfplumber
+        self._pdfplumber_available = False
+        if use_pdfplumber:
+            try:
+                import pdfplumber
+                self.pdfplumber = pdfplumber
+                self._pdfplumber_available = True
+            except ImportError:
+                logger.warning("pdfplumber not available, table extraction disabled")
 
     def parse(self, pdf_path: str) -> Dict:
         """
@@ -279,21 +287,25 @@ class AnnualReportParser:
                     continue
         return None
 
-    def extract_financial_tables(self, pdf_path: str) -> Dict:
-        """尝试提取财务数据表格（需要pdfplumber）"""
+    def extract_financial_tables(self, pdf_path: str | Path) -> Dict:
+        """使用 pdfplumber 提取 PDF 中的表格"""
         if not self._pdfplumber_available:
             logger.warning("pdfplumber required for table extraction")
             return {}
 
+        pdf_path = Path(pdf_path)
+        if not pdf_path.exists():
+            raise FileNotFoundError(f"PDF not found: {pdf_path}")
+
         try:
-            with self.pdfplumber.open(pdf_path) as pdf:
+            with self.pdfplumber.open(str(pdf_path)) as pdf:
                 tables = []
                 for page in pdf.pages:
                     page_tables = page.extract_tables()
                     tables.extend(page_tables)
             return {'tables_count': len(tables), 'tables': tables[:5]}
         except Exception as e:
-            logger.error(f"Table extraction failed: {e}")
+            logger.error(f"Table extraction failed for {pdf_path.name}: {e}")
             return {}
 
 

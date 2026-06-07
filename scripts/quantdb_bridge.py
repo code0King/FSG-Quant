@@ -212,10 +212,10 @@ def fetch_turnover_from_pdf(pdf_base: Path, stock_codes: list[str], years: list[
     """
     从 PDF 年报提取核心人员变动率。
 
-    降级（从优到劣）:
-      1. 本地缓存 Parquet（之前解析的快照）
-      2. PDF 现场解析（需 Camelot + Ghostscript）
-      3. 返回 0.0
+     降级（从优到劣）:
+       1. 本地缓存 Parquet（之前解析的快照）
+       2. PDF 现场解析（pdfplumber 提取董监高表格）
+       3. 返回 0.0
 
     返回: {(stock_code, report_year): turnover_rate}
     """

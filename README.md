@@ -27,8 +27,8 @@
 ### L3 治理排雷层
 - 大股东质押率监控（akshare → Parquet缓存 → 0.0 降级）
 - 审计意见一票否决（三关键词语义匹配 + "保留意见" 关键词）
-- 核心人员流失率分析（Camelot 表格解析 → 0.0 降级）
-- PDF年报全自动解析（PDF-Extract-Kit MDA文本 + PyMuPDF 降级）
+- 核心人员流失率分析（pdfplumber 表格解析 → 变动率计算）
+- PDF年报全自动解析（PyMuPDF 提取文本 + pdfplumber 提取表格）
 
 ### 因子合成与回测
 - 施密特正交化消除多重共线性
@@ -61,9 +61,7 @@ mkdir data\raw\annual_reports
 mkdir data\market_data\daily_quotes
 mkdir data\cache\parsed_pdf
 
-# 安装可选依赖（增强PDF解析能力）
-pip install pdf-extract-kit     # 高质量MDA文本提取（~2GB模型权重）
-pip install camelot-py          # 董监高表格提取（需安装Ghostscript）
+# 安装可选依赖
 pip install akshare>=1.14.0     # 质押比例数据获取
 
 # 下载年报PDF（手动或自动）
@@ -74,8 +72,6 @@ pip install akshare>=1.14.0     # 质押比例数据获取
 ```
 
 所有可选依赖均有优雅降级：
-- 无 pdf-extract-kit → 自动使用 PyMuPDF 提取 MDA 文本
-- 无 camelot-py → 高管变动率保持 0.0
 - 无 akshare → 质押比例保持 0.0
 
 ### 3. 运行Pipeline

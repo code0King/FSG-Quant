@@ -126,12 +126,12 @@
 
 ## PDF 解析管线重构（2026-06-06）
 
-整合 PDF-Extract-Kit（MDA 文本）+ Camelot（高管离职表）+ akshare（质押比例），对接 quant_DB 统一数据接口。
+整合 akshare（质押比例），对接 quant_DB 统一数据接口。
 
 **新增/修改**:
 - `scripts/quantdb_bridge.py` — quant_DB 集成、akshare 质押、PDF 高管 turnover
-- `src/data_pipeline/pdf_extractor.py` — PDF-Extract-Kit + PyMuPDF 降级
-- `src/data_pipeline/executive_parser.py` — Camelot 表格解析 + 降级
+- `src/data_pipeline/pdf_extractor.py` — PyMuPDF 文本提取
+- `src/data_pipeline/executive_parser.py` — 高层人员表格解析
 - `src/data_pipeline/pdf_parser.py` — 重构，改进 MDA 提取、审计意见、缓存
 
 **关键修复**:
@@ -144,6 +144,22 @@
 
 ---
 
+## PDF 解析方案切换为 pdfplumber + PyMuPDF（2026-06-07）
+
+移除 pdf-extract-kit 和 camelot 依赖，采用 pdfplumber（表格提取）+ PyMuPDF（文字提取）方案。
+核心人员任职表格原始数据以 MD 格式保存到 data/cache 目录。
+
+**修改内容**:
+- `src/data_pipeline/executive_parser.py` — 从 Camelot 切换为 pdfplumber，新增 `save_executive_table_to_md()` 保存原始表格到 data/cache
+- `src/data_pipeline/pdf_extractor.py` — 集成 pdfplumber 可用性检测，清理 PDF-Extract-Kit 引用
+- `src/data_pipeline/pdf_parser.py` — 修复 pdfplumber 初始化，清理 PDF-Extract-Kit 引用
+- `config/data_source.yaml` — 移除 PDF-Extract-Kit 和 Camelot 配置项
+- `requirements.txt` — 移除 pdf-extract-kit 和 camelot-py 注释
+- `README.md` — 更新文档说明
+- `tests/` — 更新测试用例
+
+---
+
 ## 技术亮点
 
 1. **TDD 开发模式** — 128 个测试覆盖正常流程和边界情况
@@ -152,7 +168,7 @@
 4. **双维度打分卡** — 进攻型（成长导向）vs 防御型（稳健导向）
 5. **风险分级系统** — 红橙黄绿四级，治理风险一票否决
 6. **Mock 隔离** — 解决 torch DLL 兼容性问题，测试速度快
-7. **优雅降级** — pdf-extract-kit / camelot / akshare 均为可选依赖
+7. **优雅降级** — pdfplumber / akshare 均为可选依赖，缺失时自动降级
 
 ## 相关文档
 

@@ -35,6 +35,7 @@ Thumbs.db
 *.tmp
 *.bak
 *.log
+提示词.txt
 
 # 测试
 .pytest_cache/

@@ -12,12 +12,9 @@ transformers>=4.30.0
 torch>=2.0.0
 sentencepiece>=0.1.99
 
-# PDF解析
+# PDF解析（pdfplumber 提取表格 + PyMuPDF 提取文本）
 pdfplumber>=0.9.0
 PyMuPDF>=1.22.0
-# PDF提取增强（可选）: pip install pdf-extract-kit camelot-py
-# pdf-extract-kit: 高质量中文PDF文本提取（含模型权重）
-# camelot-py: 有线表格提取，需系统安装Ghostscript
 
 # 量化回测
 pyqlib>=0.9.0

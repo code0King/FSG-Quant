@@ -3,8 +3,7 @@ PDF 文本提取模块（主项目用）
 
 提取路径: .md 缓存 → PyMuPDF 直接提取 → 写入缓存。
 表格自动识别并渲染为 Markdown 表格格式。
-
-扫描件场景请使用 .venv_pdfkit/extract_pdf.py（子环境独立部署）。
+pdfplumber 负责处理结构化表格数据（详见 executive_parser 模块）。
 
 用法:
     from data_pipeline.pdf_extractor import extract_text
@@ -21,12 +20,18 @@ logger = logging.getLogger(__name__)
 try:
     import fitz
     FITZ_AVAILABLE = True
-    # 压制 PyMuPDF 内部 layout 建议（从 C 层发出，需全局过滤）
     import warnings
     warnings.filterwarnings("ignore", category=UserWarning, module="fitz")
 except ImportError:
     FITZ_AVAILABLE = False
     logger.warning("PyMuPDF (fitz) not installed. Install: pip install PyMuPDF")
+
+PDFPLUMBER_AVAILABLE = False
+try:
+    import pdfplumber
+    PDFPLUMBER_AVAILABLE = True
+except ImportError:
+    logger.warning("pdfplumber not installed. Install: pip install pdfplumber")
 
 CACHE_DIR = Path("data/cache/parsed_pdf")
 

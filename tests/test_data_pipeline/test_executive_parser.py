@@ -65,9 +65,15 @@ def test_compute_turnover_rate_multiple_years():
     assert rate == pytest.approx(33.333333333333336)
 
 
-def test_parse_executive_table_no_camelot():
-    """Camelot 不可用时返回 None"""
-    from data_pipeline.executive_parser import parse_executive_table, CAMELOT_AVAILABLE
-    if not CAMELOT_AVAILABLE:
+def test_parse_executive_table_not_found():
+    """PDF 不存在时抛出 FileNotFoundError，pdfplumber 不可用时返回 None"""
+    from data_pipeline.executive_parser import parse_executive_table, PDFPLUMBER_AVAILABLE
+    if PDFPLUMBER_AVAILABLE:
+        try:
+            parse_executive_table("nonexistent.pdf")
+            assert False, "Should raise FileNotFoundError"
+        except FileNotFoundError:
+            pass
+    else:
         result = parse_executive_table("nonexistent.pdf")
         assert result is None
