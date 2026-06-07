@@ -31,17 +31,21 @@ from factors.L3_governance import L3GovernanceFactor
 from factors.factor_synthesizer import FactorSynthesizer
 from backtest.backtest_engine import BacktestEngine
 
-# 配置日志
+# 配置日志（stdout + 文件，按时间戳归档）
+_log_dir = Path("logs")
+_log_dir.mkdir(parents=True, exist_ok=True)
+_log_file = _log_dir / f"analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler('logs/analysis.log', encoding='utf-8')
+        logging.FileHandler(_log_file, encoding='utf-8')
     ]
 )
-
 logger = logging.getLogger(__name__)
+logger.info(f"Log file: {_log_file}")
 
 
 def run_single_stock_analysis(stock_code: str, year: int) -> Dict:

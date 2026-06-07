@@ -25,9 +25,10 @@
 - 研发强度、CAPEX兑现率
 
 ### L3 治理排雷层
-- 大股东质押率监控
-- 审计意见一票否决
-- 核心人员流失率分析
+- 大股东质押率监控（akshare → Parquet缓存 → 0.0 降级）
+- 审计意见一票否决（三关键词语义匹配 + "保留意见" 关键词）
+- 核心人员流失率分析（Camelot 表格解析 → 0.0 降级）
+- PDF年报全自动解析（PDF-Extract-Kit MDA文本 + PyMuPDF 降级）
 
 ### 因子合成与回测
 - 施密特正交化消除多重共线性
@@ -58,6 +59,12 @@ pip install -r requirements.txt
 # 创建数据目录
 mkdir data\raw\annual_reports
 mkdir data\market_data\daily_quotes
+mkdir data\cache\parsed_pdf
+
+# 安装可选依赖（增强PDF解析能力）
+pip install pdf-extract-kit     # 高质量MDA文本提取（~2GB模型权重）
+pip install camelot-py          # 董监高表格提取（需安装Ghostscript）
+pip install akshare>=1.14.0     # 质押比例数据获取
 
 # 下载年报PDF（手动或自动）
 # 从巨潮资讯下载年报PDF到 data/raw/annual_reports/
@@ -65,6 +72,11 @@ mkdir data\market_data\daily_quotes
 # 导出行情数据（从Tushare/Akshare）
 # 保存为Parquet格式到 data/market_data/daily_quotes/
 ```
+
+所有可选依赖均有优雅降级：
+- 无 pdf-extract-kit → 自动使用 PyMuPDF 提取 MDA 文本
+- 无 camelot-py → 高管变动率保持 0.0
+- 无 akshare → 质押比例保持 0.0
 
 ### 3. 运行Pipeline
 
@@ -121,6 +133,9 @@ FSG-Quant/
 - [PRD v2.0](docs/PRD_v2.0.md) - 产品需求文档
 - [系统设计v2.0](docs/system_design_v2.0.md) - 系统架构设计
 - [详细设计](docs/detailed_design.md) - 模块详细设计
+- [DataLoader 使用指南](docs/DATALOADER_GUIDE.md) - 数据加载 API 参考
+- [多数据源框架指南](docs/MULTI_DATASOURCE_GUIDE.md) - 数据源配置与管理
+- [开发历程](docs/DEVELOPMENT_HISTORY.md) - 开发进度与版本记录
 
 ## 🔧 开发指南
 

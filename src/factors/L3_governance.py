@@ -92,10 +92,10 @@ class L3GovernanceFactor:
             )
             
             return {
-                'pledge_ratio': round(pledge_ratio, 2) if pledge_ratio else None,
+                'pledge_ratio': round(pledge_ratio, 2) if pledge_ratio is not None else None,
                 'audit_opinion': audit_opinion,
                 'is_non_standard_audit': is_non_standard,
-                'executive_turnover': round(executive_turnover, 2) if executive_turnover else None,
+                'executive_turnover': round(executive_turnover, 2) if executive_turnover is not None else None,
                 'governance_risk_level': risk_level
             }
             
@@ -131,7 +131,7 @@ class L3GovernanceFactor:
             
             # 获取质押比例
             ratio = df.iloc[0]['pledged_shares_ratio']
-            return float(ratio)
+            return float(ratio) if ratio is not None else None
             
         except Exception as e:
             logger.error(f"Failed to calculate pledge ratio for {stock_code} {year}: {str(e)}")

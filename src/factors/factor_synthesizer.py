@@ -212,16 +212,16 @@ class FactorSynthesizer:
         factors = {}
         
         # L1因子
-        factors['l1_revenue_growth'] = stock_data.get('revenue_growth', 0) * 100  # 转为百分比
-        factors['l1_profit_quality'] = stock_data.get('profit_quality_score', 50)
-        factors['l1_cash_quality'] = stock_data.get('cash_flow_coverage', 1.0) * 50  # 映射到0-100
-        factors['l1_asset_health'] = stock_data.get('asset_health_score', 50)
-        factors['l1_stability'] = stock_data.get('roe', 0.1) * 500  # ROE映射
-        
+        factors['l1_revenue_growth'] = (stock_data.get('revenue_growth') or 0) * 100  # 转为百分比
+        factors['l1_profit_quality'] = stock_data.get('profit_quality_score') or 50
+        factors['l1_cash_quality'] = (stock_data.get('cash_flow_coverage') or 1.0) * 50  # 映射到0-100
+        factors['l1_asset_health'] = stock_data.get('asset_health_score') or 50
+        factors['l1_stability'] = (stock_data.get('roe') or 0.1) * 500  # ROE映射
+
         # L2因子
-        factors['l2_fulfillment'] = stock_data.get('revenue_fulfillment_rate', 100)
-        factors['l2_sentiment'] = (stock_data.get('management_sentiment', 0) + 1) * 50  # -1~1映射到0-100
-        factors['l2_consistency'] = stock_data.get('strategy_execution_score', 50)
+        factors['l2_fulfillment'] = stock_data.get('revenue_fulfillment_rate') or 100
+        factors['l2_sentiment'] = ((stock_data.get('management_sentiment') or 0) + 1) * 50  # -1~1映射到0-100
+        factors['l2_consistency'] = stock_data.get('strategy_execution_score') or 50
         
         # L3因子（治理评分，从风险等级转换）
         governance_level = stock_data.get('governance_risk_level', 'yellow')

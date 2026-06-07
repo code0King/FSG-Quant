@@ -109,39 +109,46 @@ class L1PerformanceFactor:
             >>> print(f"Quality Score: {result['profit_quality_score']}")
         """
         try:
-            # Step 1: 获取财务数据
+            # Step 1: 获取当年和上年财务数据
             financial = self._get_financial_data(stock_code, year)
-            
+            last_financial = self._get_financial_data(stock_code, year - 1)
+
             if financial is None or len(financial) == 0:
                 logger.warning(f"No data for {stock_code} {year}")
                 return None
-            
+
             # 转换为字典
             fin_dict = financial.iloc[0].to_dict()
-            
+            last_fin_dict = last_financial.iloc[0].to_dict() if last_financial is not None and not last_financial.empty else None
+
             # Step 2: 计算基础因子
             roe = self._calculate_roe(fin_dict)
             roa = self._calculate_roa(fin_dict)
             roic = self._calculate_roic(fin_dict)
             gross_margin = self._calculate_gross_margin(fin_dict)
-            
-            # Step 3: 毛利率分级（行业差异化）
+
+            # Step 3: 营收同比增长率
+            current_revenue = fin_dict.get('revenue', 0)
+            last_revenue = last_fin_dict.get('revenue', 0) if last_fin_dict else 0
+            revenue_growth = ((current_revenue - last_revenue) / last_revenue) if last_revenue and last_revenue != 0 else 0
+
+            # Step 4: 毛利率分级（行业差异化）
             grade, score = self._evaluate_gross_margin(stock_code, year, gross_margin)
-            
-            # Step 4: 扣非净利润占比
+
+            # Step 5: 扣非净利润占比
             deducted_ratio = self._calculate_deducted_ratio(fin_dict)
-            
-            # Step 5: 现金流覆盖倍数
+
+            # Step 6: 现金流覆盖倍数
             cash_coverage = self._calculate_cash_coverage(fin_dict)
-            
-            # Step 6: 盈利质量综合评分
+
+            # Step 7: 盈利质量综合评分
             profit_quality = self._composite_profit_quality(
                 roe, roic, cash_coverage, deducted_ratio, score
             )
-            
-            # Step 7: 预警标记
+
+            # Step 8: 预警标记
             warnings = self._check_warnings(fin_dict, cash_coverage, deducted_ratio)
-            
+
             return {
                 'roe': round(roe, 4),
                 'roa': round(roa, 4),
@@ -152,6 +159,7 @@ class L1PerformanceFactor:
                 'deducted_profit_ratio': round(deducted_ratio, 4),
                 'cash_flow_coverage': round(cash_coverage, 4),
                 'profit_quality_score': round(profit_quality, 2),
+                'revenue_growth': round(revenue_growth, 6),
                 'warning_flags': warnings
             }
             

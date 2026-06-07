@@ -170,35 +170,72 @@ class BacktestEngine:
     
     def _simulate_year_return(self, selected_stocks: pd.DataFrame, year: int) -> float:
         """
-        模拟年度收益（简化版）
-        
-        注意：实际实现应该接入真实行情数据计算收益
-        这里使用简化逻辑用于测试
-        
-        Args:
-            selected_stocks: 选中的股票
-            year: 年份
-            
-        Returns:
-            组合收益率
+        使用真实行情数据计算年度组合收益。
+        从年初第一个交易日持有到年末最后一个交易日，等权持有。
         """
-        # TODO: 接入真实行情数据
-        # 当前简化实现：基于平均得分估算收益
+        import pandas as pd
+        from pathlib import Path
+
+        market_dir = Path("data/market_data/daily_quotes")
+        parquet_path = market_dir / f"{year}.parquet"
+
+        if not parquet_path.exists():
+            logger.warning(f"Market data not found: {parquet_path}, using simulated return")
+            return self._fallback_return(selected_stocks)
+
+        try:
+            market_df = pd.read_parquet(parquet_path)
+            stock_codes = selected_stocks['stock_code'].tolist()
+
+            # 获取该年所有交易日
+            all_dates = market_df['trade_date'].unique()
+            year_dates = sorted([d for d in all_dates if str(d)[:4] == str(year)])
+            if len(year_dates) < 2:
+                logger.warning(f"Not enough trading days in {year}")
+                return self._fallback_return(selected_stocks)
+
+            first_date, last_date = year_dates[0], year_dates[-1]
+
+            # 获取期初期末收盘价
+            first_prices = market_df[market_df['trade_date'] == first_date][
+                ['stock_code', 'adj_close']
+            ].set_index('stock_code')
+            last_prices = market_df[market_df['trade_date'] == last_date][
+                ['stock_code', 'adj_close']
+            ].set_index('stock_code')
+
+            returns = []
+            for code in stock_codes:
+                if code in first_prices.index and code in last_prices.index:
+                    p0 = first_prices.loc[code, 'adj_close']
+                    p1 = last_prices.loc[code, 'adj_close']
+                    if p0 and p0 > 0:
+                        returns.append((p1 - p0) / p0)
+
+            if not returns:
+                logger.warning(f"No valid price data for selected stocks in {year}")
+                return self._fallback_return(selected_stocks)
+
+            portfolio_return = sum(returns) / len(returns)
+            logger.info(f"Real market return for {year}: {portfolio_return:.2%} "
+                        f"(based on {len(returns)} stocks)")
+            return portfolio_return
+
+        except Exception as e:
+            logger.error(f"Market data calculation failed: {e}")
+            return self._fallback_return(selected_stocks)
+
+    def _fallback_return(self, selected_stocks: pd.DataFrame) -> float:
+        """兜底：当真实行情不可用时使用评分估算"""
         if 'offensive_score' in selected_stocks.columns:
             avg_score = selected_stocks['offensive_score'].mean()
         elif 'defensive_score' in selected_stocks.columns:
             avg_score = selected_stocks['defensive_score'].mean()
         else:
             avg_score = 50
-        
-        # 简化的收益映射：得分越高，预期收益越高
-        # 假设：80分对应15%收益，50分对应5%收益，20分对应-5%收益
-        base_return = 0.05  # 基础收益5%
-        score_factor = (avg_score - 50) / 100  # 得分因子
-        
-        simulated_return = base_return + score_factor * 0.2  # ±10%的波动
-        
-        return simulated_return
+        base_return = 0.05
+        score_factor = (avg_score - 50) / 100
+        return base_return + score_factor * 0.2
     
     def _calculate_performance_metrics(self, portfolio_returns: List[Dict]) -> Dict:
         """

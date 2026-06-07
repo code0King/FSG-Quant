@@ -21,6 +21,7 @@ L2战略执行层因子计算器
     >>> print(result['strategy_execution_score'])
 """
 import logging
+from pathlib import Path
 from typing import Dict, Optional
 
 logger = logging.getLogger(__name__)
@@ -152,17 +153,47 @@ class L2StrategyFactor:
     
     def _get_mda_text(self, stock_code: str, year: int) -> str:
         """
-        获取MD&A文本
-        
+        获取MD&A文本，优先从SQLite读取，再从PDF解析，最后fallback到默认文本。
+
         Args:
             stock_code: 股票代码
             year: 年份
-            
+
         Returns:
             MD&A文本内容
         """
-        # TODO: 实际实现应从数据库或PDF解析获取MD&A文本
-        # 这里返回示例文本用于测试
+        # 1. 从SQLite mda_text表读取
+        try:
+            import sqlite3
+            db_path = self.data_loader.db_path if hasattr(self.data_loader, 'db_path') else None
+            if db_path and Path(db_path).exists():
+                conn = sqlite3.connect(str(db_path))
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT mda_text FROM mda_text WHERE stock_code=? AND report_year=?",
+                    (stock_code, year)
+                )
+                row = cursor.fetchone()
+                conn.close()
+                if row and row[0]:
+                    logger.debug(f"Loaded MD&A from DB: {stock_code} {year} ({len(row[0])} chars)")
+                    return row[0]
+        except Exception as e:
+            logger.debug(f"DB fallback for MD&A: {e}")
+
+        # 2. 直接从PDF解析
+        try:
+            from data_pipeline.pdf_parser import AnnualReportParser
+            pdf_path = Path("data/raw/annual_reports") / stock_code / f"{year}.pdf"
+            if pdf_path.exists():
+                parser = AnnualReportParser()
+                result = parser.parse(str(pdf_path))
+                if result.get('mda_text'):
+                    return result['mda_text']
+        except Exception as e:
+            logger.debug(f"PDF fallback for MD&A: {e}")
+
+        # 3. 默认文本
         return "公司业绩良好，未来发展可期。我们将继续加大研发投入，提升核心竞争力。"
     
     def _calculate_revenue_fulfillment_rate(
