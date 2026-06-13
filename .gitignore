@@ -36,6 +36,7 @@ Thumbs.db
 *.bak
 *.log
 提示词.txt
+akshare接口API.md
 
 # 测试
 .pytest_cache/
